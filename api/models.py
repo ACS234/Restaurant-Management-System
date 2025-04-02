@@ -36,6 +36,7 @@ class Reservation(models.Model):
         return f"{self.customer_name} - {self.restaurant.name}"
     
 class Chef(models.Model):
+    restaurant = models.ForeignKey(Restaurant, related_name='reservations', on_delete=models.CASCADE)
     name=models.CharField(max_length=255,null=True,blank=True)
     age=models.IntegerField(null=True,blank=True)
     experience=models.IntegerField(null=True,blank=True)
