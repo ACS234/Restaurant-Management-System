@@ -16,15 +16,7 @@ class Restaurant(models.Model):
     def __str__(self):
         return self.name
     
-class Menu(models.Model):
-    restaurant = models.ForeignKey(Restaurant, related_name='menus', on_delete=models.CASCADE)
-    item_name = models.CharField(max_length=255)
-    item_description = models.TextField()
-    item_price = models.DecimalField(max_digits=10, decimal_places=2)
-    is_vegetarian = models.BooleanField(default=False)
-
-    def __str__(self):
-        return self.item_name
+    
     
 class Reservation(models.Model):
     restaurant = models.ForeignKey(Restaurant, related_name='reservations', on_delete=models.CASCADE)
