@@ -17,6 +17,7 @@ class Restaurant(models.Model):
         return self.name
     
     
+    
 class Reservation(models.Model):
     restaurant = models.ForeignKey(Restaurant, related_name='reservations', on_delete=models.CASCADE)
     customer_name = models.CharField(User,max_length=255)
