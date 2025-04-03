@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Restaurant,Menu,Reservation,Chef,Food,Order,Payment
+from .models import Restaurant,Reservation,Chef,Food,Order,Payment
 
 # create modelserializer for Resturant
 class RestaurantSerializer(serializers.ModelSerializer):
