@@ -18,6 +18,8 @@ class Restaurant(models.Model):
     def __str__(self):
         return self.name
     
+
+ 
 class Reservation(models.Model):
     restaurant = models.ForeignKey(Restaurant, related_name='reservations', on_delete=models.CASCADE)
     customer_name = models.CharField(max_length=255,null=True,blank=True)
