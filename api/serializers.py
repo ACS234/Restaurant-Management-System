@@ -1,5 +1,9 @@
 from rest_framework import serializers
+<<<<<<< HEAD
 from .models import Restaurant,Menu,Reservation,Chef,Food,Order,Payment
+=======
+from .models import *
+>>>>>>> e794a4ce405600712ebd18d54a02b09cd3b4feec
 
 # create modelserializer for Resturant
 class RestaurantSerializer(serializers.ModelSerializer):
@@ -7,10 +11,6 @@ class RestaurantSerializer(serializers.ModelSerializer):
         model=Restaurant
         fields='__all__'
 
-class MenuSerializer(serializers.ModelSerializer):
-    class Meta:
-        model=Menu
-        fields="__all__"
 
 class ReservationSerializer(serializers.ModelSerializer):
     class Meta:
