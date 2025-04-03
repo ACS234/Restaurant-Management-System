@@ -18,11 +18,8 @@ class Restaurant(models.Model):
     def __str__(self):
         return self.name
     
-<<<<<<< HEAD
 
  
-=======
->>>>>>> e794a4ce405600712ebd18d54a02b09cd3b4feec
 class Reservation(models.Model):
     restaurant = models.ForeignKey(Restaurant, related_name='reservations', on_delete=models.CASCADE)
     customer_name = models.CharField(max_length=255,null=True,blank=True)
