@@ -55,8 +55,9 @@ class Order(models.Model):
     restaurant = models.ForeignKey(Restaurant, on_delete=models.CASCADE)
     customer_name = models.CharField(max_length=255,null=True, blank=True)
     customer_contact = models.CharField(max_length=15,null=True, blank=True)
-    food_items = models.ManyToManyField(Food, through='OrderItem')
-    total_amount = models.DecimalField(max_digits=8, decimal_places=2)  
+    food_items = models.ManyToManyField(Food, through='OrderItem',default=None)
+    total_amount = models.DecimalField(max_digits=8, decimal_places=2,null=True, blank=True)  
+    delivery_address = models.TextField(null=True, blank=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Pending')
     created_at = models.DateTimeField(auto_now_add=True)
 
