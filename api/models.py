@@ -2,6 +2,7 @@ from django.db import models
 from django.core.validators import MinValueValidator
 import qrcode
 from io import BytesIO
+from django.utils import timezone
 from django.core.files.base import ContentFile
 
 class Restaurant(models.Model):
@@ -25,52 +26,55 @@ class Restaurant(models.Model):
         return self.name
 
 
-class Food(models.Model):
-    name = models.CharField(max_length=100)
-    description = models.TextField()
-    price = models.DecimalField(max_digits=6, decimal_places=2)
-    ingredients = models.TextField()
-    image = models.ImageField(upload_to='foods/')
+ 
+class Reservation(models.Model):
+    restaurant = models.ForeignKey(Restaurant, related_name='reservations', on_delete=models.CASCADE)
+    customer_name = models.CharField(max_length=255,null=True,blank=True)
+    reservation_date = models.DateTimeField(null=True, blank=True)
+    number_of_people = models.IntegerField(null=True, blank=True)
 
+    def __str__(self):
+        return f"{self.customer_name} - {self.restaurant.name}"
+    
+class Food(models.Model):
+    restaurant = models.ForeignKey(Restaurant, related_name='restaurants', on_delete=models.CASCADE)
+    name=models.CharField(max_length=255,null=True,blank=True)
+    price=models.IntegerField(MinValueValidator=50)
+  
+    
     def __str__(self):
         return self.name
 
 class Menu(models.Model):
-    title = models.CharField(max_length=100)
+    title = models.CharField(max_length=100,null=True, blank=True)
     description = models.TextField()
-    available_from = models.DateTimeField()
-    available_to = models.DateTimeField()
-    foods = models.ManyToManyField(Food, related_name='menus')  # Many-to-Many Relationship
+    available_from = models.DateTimeField(null=True, blank=True)
+    available_to = models.DateTimeField(null=True, blank=True)
+    foods = models.ManyToManyField(Food, related_name='menus',default=None)  # Many-to-Many Relationship
 
     def __str__(self):
         return self.title
 
 class Order(models.Model):
-    STATUS_CHOICES = [
-        ('Pending', 'Pending'),
-        ('Preparing', 'Preparing'),
-        ('Completed', 'Completed'),
-        ('Cancelled', 'Cancelled'),
-    ]
-    restaurant = models.ForeignKey(Restaurant, on_delete=models.CASCADE)
-    customer_name = models.CharField(max_length=255,null=True, blank=True)
-    customer_contact = models.CharField(max_length=15,null=True, blank=True)
-    food_items = models.ManyToManyField(Food, through='OrderItem')
-    total_amount = models.DecimalField(max_digits=8, decimal_places=2)  
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Pending')
-    created_at = models.DateTimeField(auto_now_add=True)
-
+    restaurant=models.ForeignKey(Restaurant, related_name='orders', on_delete=models.CASCADE)
+    customer_name = models.CharField(max_length=255,null=True,blank=True)
+    order_date = models.DateTimeField(default=timezone.now)
+    total_amount = models.DecimalField(max_digits=10, decimal_places=2)
+    order_status = models.CharField(max_length=50, choices=[('Pending', 'Pending'), ('Completed', 'Completed'), ('Cancelled', 'Cancelled')])
+    food_items = models.ManyToManyField(Menu, related_name='orders')
+    
     def __str__(self):
-        return f"Order {self.id} - {self.status}"
-
+        return f"Order #{self.id} - {self.customer_name}"
+    
+    
+    def calculate_total_amount(self):
+        total = sum(food_item.price for food_item in self.food_items.all())
+        self.total_amount = total
+        self.save()
+        return total
+    
 class OrderItem(models.Model):
-    order = models.ForeignKey(Order, related_name="items", on_delete=models.CASCADE)
-    food = models.ForeignKey(Food, on_delete=models.CASCADE)
-    quantity = models.PositiveIntegerField(validators=[MinValueValidator(1)])
-
-    def __str__(self):
-        return f"{self.quantity} x {self.food.name} (Order {self.order.id})"
-
+    pass
 class Payment(models.Model):
     order = models.OneToOneField(Order, on_delete=models.CASCADE, related_name="payment")
     amount = models.DecimalField(max_digits=8, decimal_places=2)
