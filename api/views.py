@@ -57,13 +57,13 @@ class FoodUpdateView(APIView):
             return Response(serializer.data)
         return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
     
-    def delete(self,request,pk):
-        try:
-            food=Food.objects.get(pk=pk)
-        except:
-            return Response({'Error':'food not found'},status=status.HTTP_404_NOT_FOUND)
-        food.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+    # def delete(self,request,pk):
+    #     try:
+    #         food=Food.objects.get(pk=pk)
+    #     except:
+    #         return Response({'Error':'food not found'},status=status.HTTP_404_NOT_FOUND)
+    #     food.delete()
+    #     return Response(status=status.HTTP_204_NO_CONTENT)
     
 class OrderView(APIView):
     def post(self,request):
