@@ -4,7 +4,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from .models import (
-    Restaurant, Chef, Food, OrderItem, Order, Receipt, Payment, Review
+    Restaurant, Food, OrderItem, Order, Receipt, Payment, Review
 )
 from .serializers import (
     RestaurantSerializer, FoodSerializer, OrderItemSerializer,
