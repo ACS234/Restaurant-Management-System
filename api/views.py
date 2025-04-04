@@ -3,13 +3,8 @@ from django.http import FileResponse
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from .models import (
-    Restaurant, Food, OrderItem, Order, Receipt, Payment, Review
-)
-from .serializers import (
-    RestaurantSerializer, FoodSerializer, OrderItemSerializer,
-    OrderSerializer, ReceiptSerializer, PaymentSerializer, ReviewSerializer
-)
+from .models import *
+from .serializers import *
 from django.template.loader import render_to_string
 import pdfkit
 import os
@@ -22,12 +17,45 @@ class RestaurantAPIView(APIView):
         serializer = RestaurantSerializer(restaurants, many=True)
         return Response(serializer.data)
 
-    def post(self, request):
-        serializer = RestaurantSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    # def post(self, request):
+    #     serializer = RestaurantSerializer(data=request.data)
+    #     if serializer.is_valid():
+    #         serializer.save()
+    #         return Response(serializer.data, status=status.HTTP_201_CREATED)
+    #     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    def post(self, request, *args, **kwargs):
+        # Get the data from the request
+        name = request.data.get('name')
+        location = request.data.get('location')
+        contact_number = request.data.get('contact_number')
+        
+        # Check if restaurant with the same name already exists
+        if Restaurant.objects.filter(name=name).exists():
+            return Response({"error": "A restaurant with this name already exists."}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Create the restaurant
+        restaurant = Restaurant.objects.create(
+            name=name,
+            location=location,
+            contact_number=contact_number
+        )
+        
+        # Generate the QR code
+        qr = qrcode.make(f"Restaurant Menu: {restaurant.name}")
+        buffer = BytesIO()
+        qr.save(buffer, format="PNG")
+        
+        # Save the QR code to the restaurant model
+        restaurant.qr_code.save(f"qr_{restaurant.id}.png", ContentFile(buffer.getvalue()), save=False)
+        restaurant.save()  # Save again with the QR code
+
+        # Serialize the response data
+        serializer = RestaurantSerializer(restaurant)
+
+        # Return the response with the restaurant data and QR code URL
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
 
 class RestaurantQRAPIView(APIView):
     def get(self, request, pk):
@@ -47,6 +75,22 @@ class FoodAPIView(APIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+
+# Menu API
+class MenuAPIView(APIView):
+    
+    def get(self, request):
+        menus = Menu.objects.all()
+        serializer = MenuSerializer(menus, many=True)
+        return Response(serializer.data)
+    
+    def post(self,request):
+        serializer=MenuSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data,status=status.HTTP_201_CREATED)
+        return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
 
 # Order API
 class OrderAPIView(APIView):
@@ -64,19 +108,41 @@ class OrderAPIView(APIView):
 
 # Order Item API
 class OrderItemAPIView(APIView):
-    
     def get(self, request):
         # order_items = OrderItem.objects.filter(order=request.GET.get("order_id"))
         order_items = OrderItem.objects.all()
         serializer = OrderItemSerializer(order_items, many=True)
         return Response(serializer.data)
     
+    # def post(self, request):
+    #     serializer = OrderItemSerializer(data=request.data)
+    #     if serializer.is_valid():
+    #         serializer.save()
+    #         return Response(serializer.data, status=status.HTTP_201_CREATED)
+    #     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
     def post(self, request):
         serializer = OrderItemSerializer(data=request.data)
+        
         if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            # Retrieve the food item using the food ID from the request
+            food_id = request.data.get("food")
+            try:
+                food = Food.objects.get(id=food_id)
+            except Food.DoesNotExist:
+                return Response({"detail": "Food not found"}, status=status.HTTP_404_NOT_FOUND)
+
+            # Calculate the total amount (quantity * food price)
+            quantity = request.data.get("quantity")
+            total_amount = quantity * food.price 
+
+            # Save the order item with the calculated total amount
+            order_item = serializer.save(total_amount=total_amount)
+            
+            return Response(OrderItemSerializer(order_item).data, status=status.HTTP_201_CREATED)
+        
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 # Order Status API
 class OrderStatusAPIView(APIView):
@@ -93,14 +159,16 @@ class OrderStatusAPIView(APIView):
 # Payment API
 class PaymentAPIView(APIView):
     def post(self, request):
-        serializer = PaymentSerializer(data=request.data)
+        data = request.data
+        data["is_paid"] = True  # Set is_paid to True for new payments
+        
+        serializer = PaymentSerializer(data=data)
         if serializer.is_valid():
             order = serializer.validated_data.get('order')
-
             # Ensure order is not already paid
             if Payment.objects.filter(order=order).exists():
                 return Response({"error": "Payment already exists"}, status=status.HTTP_400_BAD_REQUEST)
-
+            
             payment = serializer.save()
             return Response(PaymentSerializer(payment).data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

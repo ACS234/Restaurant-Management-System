@@ -8,8 +8,6 @@ POST /restaurants/
 3 Add Foods
 POST /foods/
 
-4. Add Chef
-POST /chefs/
 
 5 Place an Order
 POST /orders/

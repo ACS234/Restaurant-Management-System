@@ -11,6 +11,12 @@ class FoodSerializer(serializers.ModelSerializer):
     class Meta:
         model = Food
         fields = '__all__'
+        
+class MenuSerializer(serializers.ModelSerializer):
+    foods = serializers.PrimaryKeyRelatedField(queryset=Food.objects.all(), many=True)
+    class Meta:
+        model = Menu
+        fields = '__all__'
 
 class OrderItemSerializer(serializers.ModelSerializer):
     class Meta:
