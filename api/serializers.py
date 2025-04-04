@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Restaurant,Reservation,Chef,Food,Order,Payment
+from .models import Restaurant, Chef, Food, OrderItem, Order, Receipt, Payment,Review
 
 class RestaurantSerializer(serializers.ModelSerializer):
     class Meta:
@@ -7,15 +7,15 @@ class RestaurantSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class ReservationSerializer(serializers.ModelSerializer):
+class FoodSerializer(serializers.ModelSerializer):
     class Meta:
-        model=Reservation
-        fields="__all__"
+        model = Food
+        fields = '__all__'
 
 class OrderItemSerializer(serializers.ModelSerializer):
     class Meta:
-        model=Chef
-        fields="__all__"
+        model = OrderItem
+        fields = '__all__'
 
 class OrderSerializer(serializers.ModelSerializer):
     items = serializers.PrimaryKeyRelatedField(queryset=OrderItem.objects.all(),many=True)

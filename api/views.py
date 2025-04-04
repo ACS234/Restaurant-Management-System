@@ -3,72 +3,38 @@ from django.http import FileResponse
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from .models import *
+from .models import (
+    Restaurant, Chef, Food, OrderItem, Order, Receipt, Payment, Review
+)
 from .serializers import (
     RestaurantSerializer, FoodSerializer, OrderItemSerializer,
     OrderSerializer, ReceiptSerializer, PaymentSerializer, ReviewSerializer
 )
-import qrcode
-from io import BytesIO
-from django.core.files.base import ContentFile
 from django.template.loader import render_to_string
 import pdfkit
 import os
 from django.conf import settings
 
-#  Restaurant API
+# Restaurant API
 class RestaurantAPIView(APIView):
     def get(self, request):
         restaurants = Restaurant.objects.all()
         serializer = RestaurantSerializer(restaurants, many=True)
         return Response(serializer.data)
 
-    # def post(self, request):
-    #     serializer = RestaurantSerializer(data=request.data)
-    #     if serializer.is_valid():
-    #         serializer.save()
-    #         return Response(serializer.data, status=status.HTTP_201_CREATED)
-    #     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
-    def post(self, request, *args, **kwargs):
-        # Get the data from the request
-        name = request.data.get('name')
-        location = request.data.get('location')
-        contact_number = request.data.get('contact_number')
-        
-        # Check if restaurant with the same name already exists
-        if Restaurant.objects.filter(name=name).exists():
-            return Response({"error": "A restaurant with this name already exists."}, status=status.HTTP_400_BAD_REQUEST)
-        
-        # Create the restaurant
-        restaurant = Restaurant.objects.create(
-            name=name,
-            location=location,
-            contact_number=contact_number
-        )
-        
-        # Generate the QR code
-        qr = qrcode.make(f"Restaurant Menu: {restaurant.name}")
-        buffer = BytesIO()
-        qr.save(buffer, format="PNG")
-        
-        # Save the QR code to the restaurant model
-        restaurant.qr_code.save(f"qr_{restaurant.id}.png", ContentFile(buffer.getvalue()), save=False)
-        restaurant.save()  # Save again with the QR code
-
-        # Serialize the response data
-        serializer = RestaurantSerializer(restaurant)
-
-        # Return the response with the restaurant data and QR code URL
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-
+    def post(self, request):
+        serializer = RestaurantSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class RestaurantQRAPIView(APIView):
     def get(self, request, pk):
         restaurant = get_object_or_404(Restaurant, pk=pk)
         return FileResponse(open(restaurant.qr_code.path, "rb"), content_type="image/png")
 
-#  Food API
+# Food API
 class FoodAPIView(APIView):
     def get(self, request):
         foods = Food.objects.all()
@@ -82,64 +48,7 @@ class FoodAPIView(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-<<<<<<< HEAD
-class FoodView(APIView):
-    def get(self,request):
-        food=Food.objects.all()
-        serializer=FoodSerializer(food,many=True)
-        return Response(serializer.data)
-    
-    def post(self,request):
-        serializer=FoodSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data,status=status.HTTP_201_CREATED)
-        return Response(serializer.errors,status=status.HTTP_404_NOT_FOUND)
-
-
-class FoodUpdateView(APIView):
-    def get(self,request,pk):
-        try:
-            food=Food.objects.get(pk=pk)
-        except Food.DoesNotExist:
-            return Response({'Error':'food not found'},status=status.HTTP_404_NOT_FOUND)
-        #Deserialize incoming data
-        serializer=FoodSerializer(food)
-        return Response(serializer.data)
-    
-    def put(self,request,pk):
-        try:
-            food=Food.objects.get(pk=pk)
-        except:
-            return Response({'Error':'food not found'},status=status.HTTP_404_NOT_FOUND)
-        serializer=FoodSerializer(food,data=request.data)
-
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
-    
-    # def delete(self,request,pk):
-    #     try:
-    #         food=Food.objects.get(pk=pk)
-    #     except:
-    #         return Response({'Error':'food not found'},status=status.HTTP_404_NOT_FOUND)
-    #     food.delete()
-    #     return Response(status=status.HTTP_204_NO_CONTENT)
-    
-class OrderView(APIView):
-    def post(self,request):
-        serializer=OrderSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data,status=status.HTTP_201_CREATED)
-        return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
-    
-    
-
-
-=======
-#  Order API
+# Order API
 class OrderAPIView(APIView):
     def get(self, request):
         orders = Order.objects.all()
@@ -153,7 +62,7 @@ class OrderAPIView(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-#  Order Item API
+# Order Item API
 class OrderItemAPIView(APIView):
     
     def get(self, request):
@@ -169,7 +78,7 @@ class OrderItemAPIView(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-#  Order Status API
+# Order Status API
 class OrderStatusAPIView(APIView):
     def get(self, request, order_id):
         order = get_object_or_404(Order, pk=order_id)
@@ -181,7 +90,7 @@ class OrderStatusAPIView(APIView):
         order.save()
         return Response({"message": "Order status updated", "status": order.status})
 
-#  Payment API
+# Payment API
 class PaymentAPIView(APIView):
     def post(self, request):
         serializer = PaymentSerializer(data=request.data)
@@ -196,7 +105,7 @@ class PaymentAPIView(APIView):
             return Response(PaymentSerializer(payment).data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-#  Receipt API (PDF Generation)
+# Receipt API (PDF Generation)
 class GenerateReceiptAPIView(APIView):
     def post(self, request, order_id):
         order = get_object_or_404(Order, pk=order_id)
@@ -232,6 +141,7 @@ class ReviewAPIView(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
 # Inventory API (Track Ingredients)
 class InventoryAPIView(APIView):
     def get(self, request):
@@ -244,4 +154,3 @@ class InventoryAPIView(APIView):
         food.stock_quantity = request.data.get("stock_quantity", food.stock_quantity)
         food.save()
         return Response({"message": "Inventory updated", "food": food.name, "stock": food.stock_quantity})
->>>>>>> e7454aaf5bb61465a95885c4bc1a435285916106
