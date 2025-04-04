@@ -1,0 +1,39 @@
+1 create restaurants
+
+POST /restaurants/
+
+2.Get QR Code
+/restaurants/1/qr/
+
+3 Add Foods
+POST /foods/
+
+4. Add Chef
+POST /chefs/
+
+5 Place an Order
+POST /orders/
+
+6. Add food to an orders
+POST /orders/items/
+
+
+7. Update Order Status
+PATCH /orders/1/status/
+
+
+8 Process Payment
+POST /payments/
+
+
+9 Generate & Download Receipt
+POST /orders/1/receipt/
+
+10 Leave a Review
+POST /reviews/
+
+
+11 Check Inventory
+
+GET /inventory/
+
