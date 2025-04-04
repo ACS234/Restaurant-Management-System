@@ -37,9 +37,9 @@ class Reservation(models.Model):
         return f"{self.customer_name} - {self.restaurant.name}"
     
 class Food(models.Model):
-    restaurant = models.ForeignKey(Restaurant, related_name='restaurants', on_delete=models.CASCADE)
+    restaurant = models.ForeignKey(Restaurant, related_name='restaurants', on_delete=models.CASCADE,default=None)
     name=models.CharField(max_length=255,null=True,blank=True)
-    price=models.IntegerField(MinValueValidator=50)
+    price=models.IntegerField(validators=[MinValueValidator(10)])
   
     
     def __str__(self):
@@ -59,19 +59,14 @@ class Order(models.Model):
     restaurant=models.ForeignKey(Restaurant, related_name='orders', on_delete=models.CASCADE)
     customer_name = models.CharField(max_length=255,null=True,blank=True)
     order_date = models.DateTimeField(default=timezone.now)
-    total_amount = models.DecimalField(max_digits=10, decimal_places=2)
-    order_status = models.CharField(max_length=50, choices=[('Pending', 'Pending'), ('Completed', 'Completed'), ('Cancelled', 'Cancelled')])
+    order_status = models.CharField(max_length=50, choices=[('Pending', 'Pending'), ('Completed', 'Completed'), ('Cancelled', 'Cancelled')],default='Pending')
     food_items = models.ManyToManyField(Menu, related_name='orders')
     
     def __str__(self):
         return f"Order #{self.id} - {self.customer_name}"
     
     
-    def calculate_total_amount(self):
-        total = sum(food_item.price for food_item in self.food_items.all())
-        self.total_amount = total
-        self.save()
-        return total
+    
     
 class OrderItem(models.Model):
     pass
