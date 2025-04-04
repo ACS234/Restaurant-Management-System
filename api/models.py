@@ -20,15 +20,16 @@ class Restaurant(models.Model):
     
 
  
-class Reservation(models.Model):
-    restaurant = models.ForeignKey(Restaurant, related_name='reservations', on_delete=models.CASCADE)
-    customer_name = models.CharField(max_length=255,null=True,blank=True)
-    reservation_date = models.DateTimeField(null=True, blank=True)
-    number_of_people = models.IntegerField(null=True, blank=True)
+# class Reservation(models.Model):
+#     restaurant = models.ForeignKey(Restaurant, related_name='reservations', on_delete=models.CASCADE)
+#     customer_name = models.CharField(max_length=255,null=True,blank=True)
+#     reservation_date = models.DateTimeField(null=True, blank=True)
+#     number_of_people = models.IntegerField(null=True, blank=True)
 
-    def __str__(self):
-        return f"{self.customer_name} - {self.restaurant.name}"
-    
+#     def __str__(self):
+#         return f"{self.customer_name} - {self.restaurant.name}"
+
+ 
 class Chef(models.Model):
     restaurant = models.ForeignKey(Restaurant, related_name='restaurants', on_delete=models.CASCADE)
     name=models.CharField(max_length=255,null=True,blank=True)
@@ -54,12 +55,17 @@ class Order(models.Model):
     restaurant=models.ForeignKey(Restaurant, related_name='orders', on_delete=models.CASCADE)
     customer_name = models.CharField(max_length=255,null=True,blank=True)
     order_date = models.DateTimeField(default=timezone.now)
-    total_amount = models.DecimalField(max_digits=10, decimal_places=2)
+    quantity = models.PositiveIntegerField(default=1)
     order_status = models.CharField(max_length=50, choices=[('Pending', 'Pending'), ('Completed', 'Completed'), ('Cancelled', 'Cancelled')])
     food_items = models.ManyToManyField(Food, related_name='orders')
+
     
     def __str__(self):
         return f"Order #{self.id} - {self.customer_name}"
+    
+    @property
+    def total_price(self):
+        return self.quantity * self.food.price 
     
     
     def calculate_total_amount(self):
