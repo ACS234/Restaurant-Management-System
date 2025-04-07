@@ -13,12 +13,14 @@ class FoodSerializer(serializers.ModelSerializer):
         fields = '__all__'
         
 class MenuSerializer(serializers.ModelSerializer):
-    foods = serializers.PrimaryKeyRelatedField(queryset=Food.objects.all(), many=True)
+    # foods = serializers.PrimaryKeyRelatedField(queryset=Food.objects.all(), many=True)
+    foods = FoodSerializer(many=True, read_only=True)
     class Meta:
         model = Menu
         fields = '__all__'
 
 class OrderItemSerializer(serializers.ModelSerializer):
+    foods = FoodSerializer(many=True, read_only=True)
     class Meta:
         model = OrderItem
         fields = '__all__'
@@ -26,6 +28,7 @@ class OrderItemSerializer(serializers.ModelSerializer):
 class OrderSerializer(serializers.ModelSerializer):
     # items = serializers.PrimaryKeyRelatedField(queryset=OrderItem.objects.all(),many=True)
     items=OrderItemSerializer(many=True,read_only=True)
+    foods = FoodSerializer(many=True, read_only=True)
     class Meta:
         model = Order
         fields = '__all__'

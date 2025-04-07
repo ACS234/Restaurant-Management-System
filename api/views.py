@@ -101,6 +101,26 @@ class MenuAPIView(APIView):
             serializer.save()
             return Response(serializer.data,status=status.HTTP_201_CREATED)
         return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+    
+
+class MenuDetailAPIView(APIView):
+    def get(self, request, pk):
+        menu = get_object_or_404(Menu, pk=pk)
+        serializer = MenuSerializer(menu)
+        return Response(serializer.data)
+
+    def patch(self, request, pk):
+        menu = get_object_or_404(Menu, pk=pk)
+        serializer = MenuSerializer(menu, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    # def delete(self, request, pk):
+    #     menu = get_object_or_404(Menu, pk=pk)
+    #     menu.delete()
+    #     return Response(status=status.HTTP_204_NO_CONTENT)
 
 # Order API
 class OrderAPIView(APIView):
@@ -114,6 +134,20 @@ class OrderAPIView(APIView):
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+class OrderDetailAPIView(APIView):
+    def get(self, request, pk):
+        order = get_object_or_404(Order, pk=pk)
+        serializer = OrderSerializer(order)
+        return Response(serializer.data)
+
+    def patch(self, request, pk):
+        order = get_object_or_404(Order, pk=pk)
+        serializer = OrderSerializer(order, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 

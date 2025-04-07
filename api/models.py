@@ -33,10 +33,12 @@ class Food(models.Model):
     menu = models.ManyToManyField(Menu, related_name="foods")
     name = models.CharField(max_length=255,null=True,blank=True)
     description = models.TextField(null=True,blank=True)
+    ingredients = models.TextField(null=True,blank=True)
     image = models.ImageField(upload_to="food_images/", null=True, blank=True)
     price = models.DecimalField(max_digits=6, decimal_places=2, validators=[MinValueValidator(0)],null=True, blank=True)
     stock_quantity = models.PositiveIntegerField(default=0)
-
+    rating = models.DecimalField(max_digits=3, decimal_places=2, default=0.00, validators=[MinValueValidator(0)])
+    
     def __str__(self):
         menu_names = ", ".join([menu.name for menu in self.menu.all()])
         return f"{self.name} ({menu_names})"
@@ -54,7 +56,7 @@ class Order(models.Model):
     restaurant = models.ForeignKey(Restaurant, on_delete=models.CASCADE,default=None)
     customer_name = models.CharField(max_length=255,null=True, blank=True)
     customer_contact = models.CharField(max_length=15,null=True, blank=True)
-    food_items = models.ManyToManyField(Food, through='OrderItem',default=None) 
+    food_items = models.ManyToManyField(Food, through='OrderItem',default=None,related_name="orders") 
     delivery_address = models.TextField(null=True, blank=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Pending')
     created_at = models.DateTimeField(auto_now_add=True)
@@ -64,7 +66,7 @@ class Order(models.Model):
 
 class OrderItem(models.Model):
     order = models.ForeignKey(Order, related_name="items", on_delete=models.CASCADE)
-    food = models.ForeignKey('Food', on_delete=models.CASCADE)
+    food = models.ForeignKey('Food', on_delete=models.CASCADE,related_name="order_items")
     quantity = models.PositiveIntegerField(validators=[MinValueValidator(1)])
 
     def __str__(self):
