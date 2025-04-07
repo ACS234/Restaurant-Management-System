@@ -24,7 +24,8 @@ class OrderItemSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class OrderSerializer(serializers.ModelSerializer):
-    items = serializers.PrimaryKeyRelatedField(queryset=OrderItem.objects.all(),many=True)
+    # items = serializers.PrimaryKeyRelatedField(queryset=OrderItem.objects.all(),many=True)
+    items=OrderItemSerializer(many=True,read_only=True)
     class Meta:
         model = Order
         fields = '__all__'
