@@ -21,6 +21,7 @@ class Restaurant(models.Model):
 class Menu(models.Model):
     restaurant = models.ForeignKey(Restaurant, on_delete=models.CASCADE, related_name="menus")
     name = models.CharField(max_length=255,null=True,blank=True)  # Example: Breakfast, Lunch, Dinner
+    category = models.CharField(max_length=255, null=True, blank=True)  # Example: Vegetarian, Non-Vegetarian
     description = models.TextField(null=True,blank=True)
     image = models.ImageField(upload_to="menu_images/", null=True, blank=True)
     is_active = models.BooleanField(default=True)  # Allows enabling/disabling menus
