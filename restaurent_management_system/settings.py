@@ -166,10 +166,10 @@ USE_TZ = True
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'uploads')
 
+
 STATIC_URL = '/static/'
-# STATICFILES_DIRS = [
-#     os.path.join(BASE_DIR, 'static'),  # Path for static files
-# ]
+STATICFILES_DIRS = [BASE_DIR / 'static']  # Development setting
+STATIC_ROOT = BASE_DIR / 'staticfiles'  # Production setting
 
 
 # Default primary key field type
