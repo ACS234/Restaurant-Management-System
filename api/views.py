@@ -17,8 +17,8 @@ import os
 from django.conf import settings
 
 # Imp data
-path_to_wkhtmltopdf=r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe'
-config = pdfkit.configuration(wkhtmltopdf=path_to_wkhtmltopdf)
+# path_to_wkhtmltopdf=r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe'
+# config = pdfkit.configuration(wkhtmltopdf=path_to_wkhtmltopdf)
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
 # Restaurant API
@@ -298,7 +298,7 @@ class GenerateReceiptAPIView(APIView):
         # Generate PDF
         try:
             pdf_file_path = os.path.join(settings.MEDIA_ROOT, f"receipts/order_{order_id}.pdf")
-            pdfkit.from_string(html_content, pdf_file_path,configuration=config)
+            pdfkit.from_string(html_content, pdf_file_path)
         except Exception as e:
             return Response({"error": str(e)}, status=500)
 
