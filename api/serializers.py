@@ -10,7 +10,8 @@ class RestaurantSerializer(serializers.ModelSerializer):
 class FoodSerializer(serializers.ModelSerializer):
     class Meta:
         model = Food
-        fields = '__all__'
+        # fields = '__all__'
+        exclude = ['menu']
         
 class MenuSerializer(serializers.ModelSerializer):
     # foods = serializers.PrimaryKeyRelatedField(queryset=Food.objects.all(), many=True)

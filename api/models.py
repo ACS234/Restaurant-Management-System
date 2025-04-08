@@ -37,14 +37,12 @@ class Food(models.Model):
     image = models.ImageField(upload_to="food_images/", null=True, blank=True)
     price = models.DecimalField(max_digits=6, decimal_places=2, validators=[MinValueValidator(0)],null=True, blank=True)
     stock_quantity = models.PositiveIntegerField(default=0)
-    rating = models.DecimalField(max_digits=3, decimal_places=2, default=0.00, validators=[MinValueValidator(0)])
+    rating = models.DecimalField(max_digits=3, decimal_places=2, default=0.0, validators=[MinValueValidator(0)])
     
     def __str__(self):
         menu_names = ", ".join([menu.name for menu in self.menu.all()])
         return f"{self.name} ({menu_names})"
 
-    def __str__(self):
-        return self.name
 
 class Order(models.Model):
     STATUS_CHOICES = [

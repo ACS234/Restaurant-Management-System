@@ -15,6 +15,8 @@ from django.template.loader import render_to_string
 import pdfkit
 import os
 from django.conf import settings
+from PIL import Image
+from django.core.files.uploadedfile import InMemoryUploadedFile
 
 # Imp data
 # path_to_wkhtmltopdf=r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe'
@@ -80,12 +82,41 @@ class FoodAPIView(APIView):
         serializer = FoodSerializer(foods, many=True)
         return Response(serializer.data)
 
+
     def post(self, request):
-        serializer = FoodSerializer(data=request.data)
+        data = request.data.copy()
+        img = request.FILES.get('img')
+
+        if img:
+            with Image.open(img) as img_file:
+                resized_img = img_file.resize((300, 300))
+
+                img_io = BytesIO()
+
+                # Save the resized image in JPEG format
+                resized_img.save(img_io, format='JPEG')  # Saving in JPEG format
+                img_io.seek(0)
+
+                # Create the InMemoryUploadedFile with JPEG format
+                resized_image = InMemoryUploadedFile(
+                    img_io, 
+                    None, 
+                    'resized_img.jpg',  # Filename with .jpg extension
+                    'image/jpeg',  # MIME type for JPEG
+                    img_io.getbuffer().nbytes, 
+                    None
+                )
+                
+                # Add the resized image to the data dictionary
+                data['image'] = resized_image
+
+        # Proceed with serializer validation and saving
+        serializer = FoodSerializer(data=data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
     
 
 # Menu API
