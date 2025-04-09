@@ -2,7 +2,11 @@ from django.urls import path
 from .views import (
     RestaurantAPIView, RestaurantQRAPIView, FoodAPIView, OrderAPIView, 
     OrderItemAPIView, OrderStatusAPIView, PaymentAPIView, GenerateReceiptAPIView,
+<<<<<<< HEAD
     ReviewAPIView,  InventoryAPIView
+=======
+    ReviewAPIView, InventoryAPIView,MenuAPIView,MenuDetailAPIView,OrderDetailAPIView
+>>>>>>> 31fa678b54e99200d8b5c8c4c30079f7ab6be694
 )
 
 urlpatterns = [
@@ -10,6 +14,9 @@ urlpatterns = [
     path('restaurants/<int:pk>/qr/', RestaurantQRAPIView.as_view(), name='restaurant_qr'),
     path('foods/', FoodAPIView.as_view(), name='food_list'),
     path('orders/', OrderAPIView.as_view(), name='order_list'),
+    path('orders/<int:pk>/', OrderDetailAPIView.as_view(), name='order_detail'),
+    path('menus/', MenuAPIView.as_view(), name='menu_list'),
+    path('menus/<int:pk>/', MenuDetailAPIView.as_view(), name='menu_detail'),
     path('orders/items/', OrderItemAPIView.as_view(), name='order_item'),
     path('orders/<int:order_id>/status/', OrderStatusAPIView.as_view(), name='order_status'),
     path('payments/', PaymentAPIView.as_view(), name='payment'),
