@@ -34,6 +34,8 @@ class Food(models.Model):
     name = models.CharField(max_length=255,null=True,blank=True)
     description = models.TextField(null=True,blank=True)
     ingredients = models.TextField(null=True,blank=True)
+    category = models.CharField(max_length=255, null=True, blank=True)  # Example: Appetizer, Main Course, Dessert
+    is_vegetarian = models.BooleanField(default=False)
     image = models.ImageField(upload_to="food_images/", null=True, blank=True)
     price = models.DecimalField(max_digits=6, decimal_places=2, validators=[MinValueValidator(0)],null=True, blank=True)
     stock_quantity = models.PositiveIntegerField(default=0)

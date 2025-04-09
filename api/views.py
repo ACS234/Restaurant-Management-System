@@ -78,7 +78,7 @@ class RestaurantQRAPIView(APIView):
 # Food API
 class FoodAPIView(APIView):
     def get(self, request):
-        foods = Food.objects.all()
+        foods = Food.objects.all().order_by('-id')
         serializer = FoodSerializer(foods, many=True)
         return Response(serializer.data)
 
